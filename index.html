@@ -14,8 +14,11 @@
 		.th {font-weight: bold;}
 		.active, .th-active {background: #ff8;}
 		.right {background: #8f8;}
+		.right input:not(:focus) {color: #8f8;}
 		.wrong {background: #f88;}
 		input {background: inherit; border: none; width: 100%; height: 100%; text-align: inherit; font-size: inherit;}
+		input[type=number]::-webkit-inner-spin-button,
+		input[type=number]::-webkit-outer-spin-button {-webkit-appearance: none;margin: 0;}
 	</style>
 </head>
 <body>
@@ -27,12 +30,12 @@ const unanswered = [];
 
 function addInput(cell, placeholder, onEnter) {
 	const input = document.createElement('input');
-	input.type = 'text';
+	input.type = 'number';
 	input.placeholder = placeholder;
 	cell.appendChild(input);
 	input.addEventListener('keypress', (e) => {
 		if (e.which === 13) {
-			onEnter(input.value);
+			onEnter(input);
 		}
 	});
 	input.addEventListener('focus', (e) => {
@@ -81,8 +84,8 @@ function next() {
 	const randomIndex = Math.floor(Math.random() * unanswered.length);
 	const [cell] = unanswered.splice(randomIndex, 1);
 	cell.className = 'active';
-	addInput(cell, '?', function(value) {
-		if (value == cell.dataset.value) {
+	addInput(cell, '?', function(input) {
+		if (input.value == cell.dataset.value) {
 			cell.className = 'right';
 		} else {
 			cell.className = 'wrong';
@@ -91,7 +94,11 @@ function next() {
 		if (activeInput) {
 			activeInput.focus();
 		} else {
-			next();
+			if (unanswered.length <= 0) {
+				input.blur();
+			} else {
+				next();
+			}
 		}
 	});
 }
