@@ -19,14 +19,24 @@
 		input {background: inherit; border: none; width: 100%; height: 100%; text-align: inherit; font-size: inherit;}
 		input[type=number]::-webkit-inner-spin-button,
 		input[type=number]::-webkit-outer-spin-button {-webkit-appearance: none;margin: 0;}
+		.result {position: fixed; display: flex; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); visibility: hidden;}
+		.modal {position: relative; display: flex; width: 50vw; height: 50vh; overflow: auto; margin: auto; border: 1vh solid #000; border-radius: 5vh; background: #f88; color: #000; text-align: center;}
+		.modal h1 {position: absolute; width: 100%; font-size: inherit; padding: 2vh 2vw;}
+		.modal article.errcount {font-size: 2em; line-height: 100%; margin: auto;}
+		.result_show {visibility: visible;}
+		.result_0 .modal {background: #8f8;}
 	</style>
 </head>
 <body>
 <table class="mult"></table>
+<div class="result"><div class="modal"><h1>Ошибок</h1><article class="errcount"></article></div></div>
 <script>
 
 const multTable = document.querySelector('.mult');
 const unanswered = [];
+const result = document.querySelector('.result');
+const errcount = document.querySelector('.errcount');
+let errors = 0;
 
 function addInput(cell, placeholder, onEnter) {
 	const input = document.createElement('input');
@@ -55,10 +65,13 @@ function addHeaderCell(cell, value, cls) {
 	cell.textContent = value;
 }
 
+const rowCount = 9;
+const colCount = 9;
+
 function init() {
-	for(let row=1; row<=9; row++) {
+	for(let row=1; row<=rowCount; row++) {
 		const rowEl = multTable.insertRow();
-		for(let col=1; col<=9; col++) {
+		for(let col=1; col<=colCount; col++) {
 			const cell = rowEl.insertCell();
 			if (row == 1) {
 				addHeaderCell(cell, col, `col-${col}`);
@@ -89,6 +102,7 @@ function next() {
 			cell.className = 'right';
 		} else {
 			cell.className = 'wrong';
+			errors++;
 		}
 		const activeInput = document.querySelector('.active input');
 		if (activeInput) {
@@ -100,6 +114,12 @@ function next() {
 					multTable.classList.remove('finished');
 				} else {
 					multTable.classList.add('finished');
+
+					errcount.innerText = errors;
+					if (errors <= 0) {
+						result.classList.add('result_0');
+					}
+					result.classList.add('result_show');
 				}
 			} else {
 				next();
