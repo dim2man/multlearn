@@ -62,26 +62,54 @@ function addInput(cell, placeholder, onEnter) {
 
 function addHeaderCell(cell, value, cls) {
 	cell.className = `th ${cls}`;
-	cell.textContent = value;
+	cell.innerText = value;
 }
 
-const rowCount = 9;
-const colCount = 9;
-
 function init() {
-	for(let row=1; row<=rowCount; row++) {
+	let rowStart = 1;
+	let colStart = 1;
+	let rowCount = 9;
+	let colCount = 9;
+	let rand = false;
+	let rowMap = [];
+	let colMap = [];
+
+	try {
+		const params = new URLSearchParams(location.search);
+		rand = params.has('rand');
+		if (params.has('rowStart')) rowStart = +params.get('rowStart');
+		if (params.has('colStart')) colStart = +params.get('colStart');
+		if (params.has('rowCount')) rowCount = +params.get('rowCount');
+		if (params.has('colCount')) colCount = +params.get('colCount');
+	} catch(e) {
+		console.error('URLSearchParams failed or not supported');
+	}
+
+	for(let row=0;row<rowCount;row++) {
+		rowMap[row] = row + rowStart;
+	}
+	for(let col=0;col<colCount;col++) {
+		colMap[col] = col + colStart;
+	}
+	if (rand) {
+		const [rowFirst, ...rowRest] = rowMap;
+		rowMap = [rowFirst, ...rowRest.sort(()=>Math.floor(Math.random()*2)*2-1)];
+		const [colFirst, ...colRest] = colMap;
+		colMap = [colFirst, ...colRest.sort(()=>Math.floor(Math.random()*2)*2-1)];
+	}
+	for(let row=0; row<rowCount; row++) {
 		const rowEl = multTable.insertRow();
-		for(let col=1; col<=colCount; col++) {
+		for(let col=0; col<colCount; col++) {
 			const cell = rowEl.insertCell();
-			if (row == 1) {
-				addHeaderCell(cell, col, `col-${col}`);
+			if (row == 0) {
+				addHeaderCell(cell, colMap[col], `col-${col}`);
 				continue;
 			}
-			if (col == 1) {
-				addHeaderCell(cell, row, `row-${row}`);
+			if (col == 0) {
+				addHeaderCell(cell, rowMap[row], `row-${row}`);
 				continue;
 			}
-			cell.dataset.value = row*col;
+			cell.dataset.value = rowMap[row]*colMap[col];
 			cell.dataset.row = row;
 			cell.dataset.col = col;
 			unanswered.push(cell);
